@@ -1,0 +1,21 @@
+{
+  "name": "page_scroller",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "animejs": "^3.2.1",
+    "vite": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/animejs": "^3.1.7",
+    "typescript": "^5.0.2"
+  }
+}
