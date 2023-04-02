@@ -2,19 +2,23 @@ export interface PageScrollerObserverOptions {
   // The element that scrolls. Usually the window or the body element
   scrollRoot?: HTMLElement,
   
-  // Target element to animate
-  target: HTMLElement,
-  
   // Container element where the target is located. This is used to calculate the scroll percentage.
   container: HTMLElement,
-  
-  properties: Record<keyof Partial<ObserverProperty>, [string | number, string | number]>,
   
   // callback function that is called when the scroll percentage changes
   onScroll?: (scrollPercent: number) => void
   
   // show debug element and information
   showDebug?: boolean
+  
+  elements: PageScrollerAnimatorOptions[]
+}
+
+export interface PageScrollerAnimatorOptions {
+  // Target element to animate
+  target: HTMLElement,
+  
+  properties: Record<keyof Partial<ObserverProperty>, [string | number, string | number]>,
   
   // delay in ms of the scroll refresh
   debounceTime?: number

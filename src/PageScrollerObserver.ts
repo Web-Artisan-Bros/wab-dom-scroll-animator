@@ -1,19 +1,17 @@
-import { PageScrollerObserverOptions } from './Interfaces/PageScrollerObserverOptions'
-import { Animator } from './Animator'
+import { PageScrollerAnimatorOptions, PageScrollerObserverOptions } from './Interfaces/PageScrollerObserverOptions'
+import { PageScrollerAnimator } from './PageScrollerAnimator'
+import { generateUniqueId } from './utilities/idGenerator'
+import { debounce } from './utilities/debounce'
 
 export class PageScrollerObserver {
   private _defaultOptions = {
-    scrollRoot: window,
-    debounceTime: 10
+    scrollRoot: window
   }
   
   private _options: PageScrollerObserverOptions
   
   // Internal id for this instance
-  private _id
-  
-  // Debounce timer
-  private _debounceTimer
+  public _id
   
   // HTMLElement used to show the debug information
   private _debugEl
@@ -26,7 +24,7 @@ export class PageScrollerObserver {
     this._options = Object.assign({}, this._defaultOptions, options)
     
     // generate a random id for this instance
-    this._id = Math.random().toString(36).slice(2, 9)
+    this._id = generateUniqueId('observer')
     
     this.initAnimators()
     this.initDebugger()
@@ -67,12 +65,23 @@ export class PageScrollerObserver {
     }
   }
   
+  get scrollRootY () {
+    if (this._options.scrollRoot) {
+      if (this._options.scrollRoot instanceof Window) {
+        return window.scrollY
+      }
+      
+      return this._options.scrollRoot.scrollTop
+    }
+    
+    return window.scrollY
+  }
+  
   /**
    * Return the scroll percentage based on the percentage of the container that is visible
    */
   get scrollPercent () {
-    let scrollY = (this._options.scrollRoot ? this._options.scrollRoot.scrollTop : window.scrollY)
-      - this.containerOffset.top
+    let scrollY = this.scrollRootY - this.containerOffset.top
     
     if (scrollY < 0) {
       return 0
@@ -84,13 +93,14 @@ export class PageScrollerObserver {
       return 100
     }
     
-    return value
+    return +value.toFixed(2)
   }
   
   private initAnimators () {
-    // Create an instance of the animator
-    this._animators.push(new Animator(this._options.target, this._options.properties))
-    
+    this._options.elements.forEach((elementOptions) => {
+      // Create an instance of the animator
+      this.animate(elementOptions)
+    })
   }
   
   private initDebugger () {
@@ -123,56 +133,25 @@ export class PageScrollerObserver {
    * Function triggered on the scroll event
    */
   public onScroll () {
-    // debounce the scroll event to avoid performance issues
-    this.debounce(() => {
-      
-      // Update the target properties and position
-      this.updateTarget()
-      
-      // Call the onScroll callback if any
-      if (this._options.onScroll) {
-        this._options.onScroll(this.scrollPercent)
-      }
-      
-      // Update the debug element if any
-      if (this._options.showDebug) {
-        this.updateDebugger()
-      }
-    })
+    // Update the target properties and position
+    this.updateTargets()
+  
+    // Call the onScroll callback if any
+    if (this._options.onScroll) {
+      this._options.onScroll(this.scrollPercent)
+    }
+  
+    // Update the debug element if any
+    if (this._options.showDebug) {
+      this.updateDebugger()
+    }
   }
   
   /**
    * Update the targets properties based on the scroll percentage
    */
-  private updateTarget () {
-    // must calculate the percentage considering startAt and endAt
-    let percentage = this.scrollPercent
-    
-    // calculate the percentage of the final scroll range
-    let subPercentage = 100 - (this._options.endAt || 0) - (this._options.startAt || 0)
-    
-    if (this._options.startAt) {
-      percentage -= this._options.startAt
-    }
-    
-    // if subPercentage is > 0, then recalculate the percentage
-    if (subPercentage) {
-      percentage = (percentage * 100) / subPercentage
-    }
-    
-    // if percentage is > 100, then set it to 100
-    if (percentage > 100) {
-      percentage = 100
-    }
-  
-    // if percentage is < 0, then set it to 0
-    if (percentage < 0) {
-      percentage = 0
-    }
-  
-    // console.log(this.scrollPercent, percentage, subPercentage)
-  
-    this._animators.forEach(animator => animator.update(percentage))
+  private updateTargets () {
+    this._animators.forEach(animator => animator.update(this.scrollPercent))
   }
   
   /**
@@ -189,7 +168,7 @@ export class PageScrollerObserver {
       boundTop: this.containerRect.top,
       boundBottom: this.containerRect.bottom
     }
-    
+  
     this._debugEl.stickyDiv.innerHTML = `
           <p>Top: ${position.top}</p>
           <p>Bottom: ${position.bottom}</p>
@@ -199,18 +178,21 @@ export class PageScrollerObserver {
           `
   }
   
-  /**
-   * Debounce function to avoid performance issues
-   *
-   * @param fn
-   */
-  private debounce (fn: () => void) {
-    if (this._debounceTimer) {
-      clearTimeout(this._debounceTimer)
+  public animate (elementOptions: PageScrollerAnimatorOptions) {
+    console.log('animate', elementOptions.target)
+    if (!elementOptions.target) {
+      console.error('You must provide a target element', elementOptions)
+      return
     }
     
-    this._debounceTimer = setTimeout(() => {
-      fn()
-    }, this._options.debounceTime || this._defaultOptions.debounceTime)
+    // first check if the target has already an animator
+    const existing = elementOptions.target[PageScrollerAnimator._libName]
+    
+    if (existing) {
+      // merge the existing options with the new ones
+      existing.updateOptions(elementOptions)
+    } else {
+      this._animators.push(new PageScrollerAnimator(elementOptions))
+    }
   }
 }
