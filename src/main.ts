@@ -53,6 +53,37 @@ window.addEventListener('load', () => {
     ]
   })
   
+  PageScroller.register({
+    container: document.querySelector('footer') as HTMLElement,
+    showDebug: true,
+    elements: [
+      {
+        target: document.querySelector('footer') as HTMLElement,
+        endAt: 80,
+        properties: {
+          '--var1': ['0', '500px'],
+          '--font-size': ['1rem', '2rem']
+        }
+      }
+    ]
+  })
+    .animate({
+      target: document.querySelector('footer h1') as HTMLElement,
+      endAt: 80,
+      properties: {
+        '--var2': ['0', '500px'],
+        'top': ['0', '500px']
+      }
+    })
+    .animate({
+      target: document.querySelector('footer h1') as HTMLElement,
+      endAt: 90,
+      properties: {
+        '--var2': ['0', '500px'],
+        'top': ['0', '500px']
+      }
+    })
+  
   // @ts-ignore
   window.PageScroller = PageScroller
 })

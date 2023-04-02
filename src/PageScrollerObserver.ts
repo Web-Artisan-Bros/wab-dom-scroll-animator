@@ -1,7 +1,8 @@
-import { PageScrollerAnimatorOptions, PageScrollerObserverOptions } from './Interfaces/PageScrollerObserverOptions'
+import { PageScrollerObserverOptions } from './Interfaces/PageScrollerObserverOptions'
 import { PageScrollerAnimator } from './PageScrollerAnimator'
 import { generateUniqueId } from './utilities/idGenerator'
 import { debounce } from './utilities/debounce'
+import { PageScrollerAnimatorOptions } from './Interfaces/PageScrollerAnimatorOptions'
 
 export class PageScrollerObserver {
   private _defaultOptions = {
@@ -182,7 +183,7 @@ export class PageScrollerObserver {
     console.log('animate', elementOptions.target)
     if (!elementOptions.target) {
       console.error('You must provide a target element', elementOptions)
-      return
+      return this
     }
     
     // first check if the target has already an animator
@@ -194,5 +195,7 @@ export class PageScrollerObserver {
     } else {
       this._animators.push(new PageScrollerAnimator(elementOptions))
     }
+    
+    return this
   }
 }
