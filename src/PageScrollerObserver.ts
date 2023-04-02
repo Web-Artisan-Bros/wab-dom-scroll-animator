@@ -2,30 +2,46 @@ import { PageScrollerObserverOptions } from './Interfaces/PageScrollerObserverOp
 import { Animator } from './Animator'
 
 export class PageScrollerObserver {
+  private _defaultOptions = {
+    scrollRoot: window,
+    debounceTime: 10
+  }
+  
   private _options: PageScrollerObserverOptions
+  
+  // Internal id for this instance
   private _id
+  
+  // Debounce timer
   private _debounceTimer
+  
+  // HTMLElement used to show the debug information
   private _debugEl
+  
+  // List of animators instances
   private _animators = []
   
   constructor (options: PageScrollerObserverOptions) {
-    this._options = Object.assign({
-      debounceTime: 10
-    }, options)
+    // merge the default options with the provided ones
+    this._options = Object.assign({}, this._defaultOptions, options)
     
     // generate a random id for this instance
     this._id = Math.random().toString(36).slice(2, 9)
     
-    // Create an instance of the animator
-    this._animators.push(new Animator(this._options.scrollTarget, this._options.properties))
-    
-    this._initDebugger()
+    this.initAnimators()
+    this.initDebugger()
   }
   
+  /**
+   * Return the offsetHeight of the container
+   */
   get viewHeight () {
     return this._options.container.offsetHeight
   }
   
+  /**
+   * Return the container element
+   */
   get container () {
     return this._options.container
   }
@@ -51,6 +67,9 @@ export class PageScrollerObserver {
     }
   }
   
+  /**
+   * Return the scroll percentage based on the percentage of the container that is visible
+   */
   get scrollPercent () {
     let scrollY = (this._options.scrollRoot ? this._options.scrollRoot.scrollTop : window.scrollY)
       - this.containerOffset.top
@@ -68,9 +87,46 @@ export class PageScrollerObserver {
     return value
   }
   
+  private initAnimators () {
+    // Create an instance of the animator
+    this._animators.push(new Animator(this._options.target, this._options.properties))
+    
+  }
+  
+  private initDebugger () {
+    const existing = this._options.container.querySelector('#__debug_div')
+    
+    if (existing) {
+      return
+    }
+    
+    this._debugEl = document.createElement('div')
+    this._debugEl.id = '__debug_div'
+    this._debugEl.style.position = 'absolute'
+    this._debugEl.style.top = '0'
+    this._debugEl.style.bottom = '0'
+    
+    const stickyDiv = document.createElement('div')
+    stickyDiv.style.position = 'sticky'
+    stickyDiv.style.top = '0'
+    
+    this._debugEl.appendChild(stickyDiv)
+    this._debugEl.stickyDiv = stickyDiv
+    
+    this.container.appendChild(this._debugEl)
+    this.container.style.position = 'relative'
+    
+    this.updateDebugger()
+  }
+  
+  /**
+   * Function triggered on the scroll event
+   */
   public onScroll () {
-    this.debounce(this._options.delay ?? 10, () => {
-      // Update the target properties
+    // debounce the scroll event to avoid performance issues
+    this.debounce(() => {
+      
+      // Update the target properties and position
       this.updateTarget()
       
       // Call the onScroll callback if any
@@ -80,10 +136,9 @@ export class PageScrollerObserver {
       
       // Update the debug element if any
       if (this._options.showDebug) {
-        this.updateDebug()
+        this.updateDebugger()
       }
     })
-    
   }
   
   /**
@@ -109,49 +164,21 @@ export class PageScrollerObserver {
     if (percentage > 100) {
       percentage = 100
     }
-    
+  
     // if percentage is < 0, then set it to 0
     if (percentage < 0) {
       percentage = 0
     }
-    
+  
     // console.log(this.scrollPercent, percentage, subPercentage)
-    
+  
     this._animators.forEach(animator => animator.update(percentage))
   }
   
-  private _initDebugger () {
-    const existing = this._options.container.querySelector('#__debug_div')
-    
-    if (existing) {
-      return
-    }
-    
-    this._debugEl = document.createElement('div')
-    this._debugEl.id = '__debug_div'
-    this._debugEl.style.position = 'absolute'
-    this._debugEl.style.top = '0'
-    this._debugEl.style.bottom = '0'
-    
-    const stickyDiv = document.createElement('div')
-    stickyDiv.style.position = 'sticky'
-    stickyDiv.style.top = '0'
-    
-    this._debugEl.appendChild(stickyDiv)
-    this._debugEl.stickyDiv = stickyDiv
-    
-    this.container.appendChild(this._debugEl)
-    this.container.style.position = 'relative'
-    this.updateDebug()
-    
-    /* this._debugAnimator = new Animator(this._debugEl, {
-       top: ['0', '100%'],
-       translateY: ['0', '-100%'],
-     })*/
-    
-  }
-  
-  private updateDebug () {
+  /**
+   * Update the debug element if any and its content
+   */
+  private updateDebugger () {
     if (!this._debugEl) {
       return
     }
@@ -172,17 +199,18 @@ export class PageScrollerObserver {
           `
   }
   
-  private debounce (delay, fn) {
+  /**
+   * Debounce function to avoid performance issues
+   *
+   * @param fn
+   */
+  private debounce (fn: () => void) {
     if (this._debounceTimer) {
       clearTimeout(this._debounceTimer)
     }
     
     this._debounceTimer = setTimeout(() => {
       fn()
-    }, delay)
+    }, this._options.debounceTime || this._defaultOptions.debounceTime)
   }
-  
-  /*public append (options: Pick<PageScrollerObserverOptions, 'scrollTarget' | 'properties'>) {
-    this._animators.push(new Animator(options.scrollTarget, options.properties))
-  }*/
 }
