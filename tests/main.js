@@ -1,13 +1,13 @@
-import { PageScroller } from './PageScroller'
+import WDSA from '../dist/index.js'
 
 window.addEventListener('load', () => {
-  PageScroller
+  WDSA
     .register({
-      container: document.querySelector('header') as HTMLElement,
-      showDebug: true,
+      container: document.querySelector('header'),
+      // showDebug: true,
       elements: [
         {
-          target: document.querySelector('header h1') as HTMLElement,
+          target: document.querySelector('header h1'),
           endAt: 50,
           properties: {
             'top': ['0', '100%'],
@@ -15,7 +15,7 @@ window.addEventListener('load', () => {
             'translateY': ['0', '-100%']
           }
         }, {
-          target: document.querySelector('header .animate2') as HTMLElement,
+          target: document.querySelector('header .animate2'),
           endAt: 70,
           debounceTime: 1,
           properties: {
@@ -25,11 +25,11 @@ window.addEventListener('load', () => {
       ]
     })
   
-  PageScroller.register({
-    container: document.querySelector('header') as HTMLElement,
+  WDSA.register({
+    container: document.querySelector('header'),
     elements: [
       {
-        target: document.querySelector('header .animate3') as HTMLElement,
+        target: document.querySelector('header .animate3'),
         endAt: 50,
         properties: {
           rotate: ['0deg', '360deg']
@@ -38,12 +38,12 @@ window.addEventListener('load', () => {
     ]
   })
   
-  PageScroller.register({
-    container: document.querySelector('main') as HTMLElement,
-    showDebug: true,
+  WDSA.register({
+    container: document.querySelector('main'),
+    // showDebug: true,
     elements: [
       {
-        target: document.querySelector('main .animate2') as HTMLElement,
+        target: document.querySelector('main .animate2'),
         endAt: 70,
         debounceTime: 1,
         properties: {
@@ -53,12 +53,12 @@ window.addEventListener('load', () => {
     ]
   })
   
-  PageScroller.register({
-    container: document.querySelector('footer') as HTMLElement,
-    showDebug: true,
+  WDSA.register({
+    container: document.querySelector('footer'),
+    // showDebug: true,
     elements: [
       {
-        target: document.querySelector('footer') as HTMLElement,
+        target: document.querySelector('footer'),
         endAt: 80,
         properties: {
           '--var1': ['0', '500px'],
@@ -68,7 +68,7 @@ window.addEventListener('load', () => {
     ]
   })
     .animate({
-      target: document.querySelector('footer h1') as HTMLElement,
+      target: document.querySelector('footer h1'),
       endAt: 80,
       properties: {
         '--var2': ['0', '500px'],
@@ -76,14 +76,15 @@ window.addEventListener('load', () => {
       }
     })
     .animate({
-      target: document.querySelector('footer h1') as HTMLElement,
-      endAt: 90,
+      target: document.querySelector('footer h1'),
+      endAt: 70,
+      debounceTime: 0,
       properties: {
-        '--var2': ['0', '500px'],
+        '--var1': ['100px', '500px'],
         'top': ['0', '500px']
       }
     })
   
   // @ts-ignore
-  window.PageScroller = PageScroller
+  window.WDSA = WDSA
 })

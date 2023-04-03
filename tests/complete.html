@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+
+  <script type="module">
+    import WDSA from '../src'
+
+    WDSA
+  </script>
+
+  <style>
+    header, main, footer {
+      height: 150vh;
+    }
+
+    header {
+      background-color: #c5c5c5;
+    }
+
+    main {
+      background-color: orange;
+    }
+
+    footer {
+      background-color: yellow;
+    }
+
+    h1 {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div style="padding-top: 20px">
+    <header>
+      <div class="position"></div>
+      <h1>Testo di prova</h1>
+
+      <div style="height: 300px"></div>
+      <div>
+        <h2 class="animate2" style="display: inline-block">Altro testo </h2>
+      </div>
+      <h3 class="animate3" style="display: inline-block">Altro testo 3</h3>
+    </header>
+  </div>
+  <main>
+    <div class="position">
+      <div class="animate2" style="position: relative;">
+        <h2 class="" style="display: inline-block; ">Teso main </h2>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="position"></div>
+    <h1 style="font-size: var(--font-size); position: relative">Testo di prova</h1>
+  </footer>
+
+</body>
+</html>
