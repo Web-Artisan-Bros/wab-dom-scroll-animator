@@ -4,6 +4,7 @@ import { generateLibName } from './utilities/libNameGenarator'
 import { WdsaBasic } from './WdsaBasic'
 import anime from 'animejs'
 import { StaggerOptions } from 'animejs'
+import { WdsaAnimatorDelayFn } from './Interfaces/WdsaAnimatorOptions'
 
 export class WDSA extends WdsaBasic {
   public static readonly libName = generateLibName('wdsa')
@@ -67,7 +68,7 @@ export class WDSA extends WdsaBasic {
     return instance
   }
   
-  public static stagger (value: number | string | ReadonlyArray<number | string>, options?: StaggerOptions): (...args) => number {
+  public static stagger (value: number | string | ReadonlyArray<number | string>, options?: StaggerOptions): WdsaAnimatorDelayFn {
     return anime.stagger(value, options)
   }
 }

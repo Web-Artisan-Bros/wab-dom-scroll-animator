@@ -35,7 +35,7 @@ export class WdsaAnimator extends WdsaBasic<WdsaAnimatorOptions> {
     super('animator', options)
   
     if (this._options.target instanceof NodeList) {
-      this._options.target.forEach((target: HTMLElement) => {
+      this._options.target.forEach((target: any) => {
         target[WdsaAnimator.libName] = this
       })
     } else {

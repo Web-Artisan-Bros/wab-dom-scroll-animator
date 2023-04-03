@@ -77,7 +77,7 @@ export class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
   get scrollPercent (): number {
     let scrollY = 0 - this.containerRect.top
     const allowNegativeStart = this._options.elements.some((elementOptions) => {
-      return elementOptions.startAt < 0
+      return elementOptions.startAt ? elementOptions.startAt < 0 : false
     })
   
     if (scrollY < 0 && !allowNegativeStart) {
@@ -203,7 +203,7 @@ export class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
     let existing
   
     if (elementOptions.target instanceof NodeList) {
-      existing = [...elementOptions.target].find(target => target[WdsaAnimator.libName])
+      existing = [...elementOptions.target].find((target: any) => target[WdsaAnimator.libName])
     } else {
       // first check if the target has already an animator
       existing = elementOptions.target[WdsaAnimator.libName]

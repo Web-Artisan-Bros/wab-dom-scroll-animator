@@ -1,5 +1,7 @@
 import { WdsaAnimatorProperty } from './WdsaAnimatorProperty'
 
+export type WdsaAnimatorDelayFn = (element: HTMLElement, index: number, length: number) => number
+
 export interface WdsaAnimatorOptions {
   // Target element to animate
   
@@ -17,6 +19,6 @@ export interface WdsaAnimatorOptions {
   endAt?: number
   
   // delay used for stagger effect
-  delay: (...args) => number
+  delay: WdsaAnimatorDelayFn
 }
 
