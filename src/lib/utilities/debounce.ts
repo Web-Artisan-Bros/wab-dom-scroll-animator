@@ -1,5 +1,5 @@
 // Debounce timer
-const _debounceTimers = {}
+const _debounceTimers: Record<string, number> = {}
 
 /**
  * Debounce function to avoid performance issues

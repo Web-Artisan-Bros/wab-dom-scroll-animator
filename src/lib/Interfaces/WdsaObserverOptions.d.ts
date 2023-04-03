@@ -1,8 +1,8 @@
-import { PageScrollerAnimatorOptions } from './PageScrollerAnimatorOptions'
+import { WdsaAnimatorOptions } from './WdsaAnimatorOptions'
 
-export interface PageScrollerObserverOptions {
+export interface WdsaObserverOptions {
   // The element that scrolls. Usually the window or the body element
-  scrollRoot?: HTMLElement,
+  scrollRoot?: HTMLElement | Window
   
   // Container element where the target is located. This is used to calculate the scroll percentage.
   container: HTMLElement,
@@ -13,5 +13,5 @@ export interface PageScrollerObserverOptions {
   // show debug element and information
   showDebug?: boolean
   
-  elements: PageScrollerAnimatorOptions[]
+  elements: WdsaAnimatorOptions[]
 }

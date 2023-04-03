@@ -1,47 +1,40 @@
-import { PageScrollerObserverOptions } from './Interfaces/PageScrollerObserverOptions'
-import { PageScrollerAnimator } from './PageScrollerAnimator'
-import { generateUniqueId } from './utilities/idGenerator'
-import { debounce } from './utilities/debounce'
-import { PageScrollerAnimatorOptions } from './Interfaces/PageScrollerAnimatorOptions'
+import { WdsaAnimator } from './WdsaAnimator'
+import { WdsaObserverOptions } from './Interfaces/WdsaObserverOptions'
+import { WdsaAnimatorOptions } from './Interfaces/WdsaAnimatorOptions'
+import { generateLibName } from './utilities/libNameGenarator'
+import { WdsaBasic } from './WdsaBasic'
 
-export class PageScrollerObserver {
-  private _defaultOptions = {
+export class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
+  // @ts-ignore
+  public static readonly libName = generateLibName('wdsa_observer')
+  
+  protected _defaultOptions: Partial<WdsaObserverOptions> = {
     scrollRoot: window
-  }
-  
-  private _options: PageScrollerObserverOptions
-  
-  // Internal id for this instance
-  public _id
-  
-  // HTMLElement used to show the debug information
-  private _debugEl
-  
-  // List of animators instances
-  private _animators = []
-  
-  constructor (options: PageScrollerObserverOptions) {
-    // merge the default options with the provided ones
-    this._options = Object.assign({}, this._defaultOptions, options)
-    
-    // generate a random id for this instance
-    this._id = generateUniqueId('observer')
-    
-    this.initAnimators()
-    this.initDebugger()
-  }
+  } as Partial<WdsaObserverOptions>
   
   /**
-   * Return the offsetHeight of the container
+   * HTMLElement used to show the debug information
+   * @private
    */
-  get viewHeight () {
-    return this._options.container.offsetHeight
+  private _debugEl!: HTMLElement & { stickyDiv?: HTMLElement }
+  
+  /**
+   * List of animators instances
+   * @private
+   */
+  private _animators: WdsaAnimator[] = []
+  
+  constructor (options: WdsaObserverOptions) {
+    super('observer', options)
+    
+    this._initAnimators()
+    this._initDebugger()
   }
   
   /**
    * Return the container element
    */
-  get container () {
+  get container (): HTMLElement {
     return this._options.container
   }
   
@@ -49,7 +42,7 @@ export class PageScrollerObserver {
    * Get the position of the container relative to the viewport
    * @returns {{top: number, bottom: number, height: number, width: number}}
    */
-  get containerRect () {
+  get containerRect (): DOMRect {
     return this._options.container.getBoundingClientRect()
   }
   
@@ -57,7 +50,7 @@ export class PageScrollerObserver {
    * Get the position of the container relative to the page
    * @returns {{top: number, bottom: number, height: number, width: number}}
    */
-  get containerOffset () {
+  get containerOffset (): { top: number, bottom: number, height: number, width: number } {
     return {
       top: this._options.container.offsetTop,
       bottom: this._options.container.offsetTop + this._options.container.offsetHeight,
@@ -66,7 +59,7 @@ export class PageScrollerObserver {
     }
   }
   
-  get scrollRootY () {
+  get scrollRootY (): number {
     if (this._options.scrollRoot) {
       if (this._options.scrollRoot instanceof Window) {
         return window.scrollY
@@ -81,14 +74,14 @@ export class PageScrollerObserver {
   /**
    * Return the scroll percentage based on the percentage of the container that is visible
    */
-  get scrollPercent () {
-    let scrollY = this.scrollRootY - this.containerOffset.top
+  get scrollPercent (): number {
+    let scrollY = 0 - this.containerRect.top
     
     if (scrollY < 0) {
       return 0
     }
     
-    const value = (scrollY / this.viewHeight) * 100
+    const value = (scrollY / this.containerRect.height) * 100
     
     if (value > 100) {
       return 100
@@ -97,14 +90,26 @@ export class PageScrollerObserver {
     return +value.toFixed(2)
   }
   
-  private initAnimators () {
-    this._options.elements.forEach((elementOptions) => {
+  /**
+   * Initialize the animators instances
+   * @private
+   */
+  private _initAnimators () {
+    this._options.elements?.forEach((elementOptions) => {
       // Create an instance of the animator
       this.animate(elementOptions)
     })
   }
   
-  private initDebugger () {
+  /**
+   * Initialize the debug element
+   * @private
+   */
+  private _initDebugger () {
+    if (!this._options.showDebug) {
+      return
+    }
+    
     const existing = this._options.container.querySelector('#__debug_div')
     
     if (existing) {
@@ -127,38 +132,39 @@ export class PageScrollerObserver {
     this.container.appendChild(this._debugEl)
     this.container.style.position = 'relative'
     
-    this.updateDebugger()
+    this._updateDebugger()
   }
   
   /**
    * Function triggered on the scroll event
+   * Method must be public to be used as a callback function in the scroll event inside WDSA
    */
   public onScroll () {
     // Update the target properties and position
-    this.updateTargets()
-  
+    this._updateTargets()
+    
     // Call the onScroll callback if any
     if (this._options.onScroll) {
       this._options.onScroll(this.scrollPercent)
     }
-  
+    
     // Update the debug element if any
     if (this._options.showDebug) {
-      this.updateDebugger()
+      this._updateDebugger()
     }
   }
   
   /**
    * Update the targets properties based on the scroll percentage
    */
-  private updateTargets () {
+  private _updateTargets () {
     this._animators.forEach(animator => animator.update(this.scrollPercent))
   }
   
   /**
    * Update the debug element if any and its content
    */
-  private updateDebugger () {
+  private _updateDebugger () {
     if (!this._debugEl) {
       return
     }
@@ -169,31 +175,37 @@ export class PageScrollerObserver {
       boundTop: this.containerRect.top,
       boundBottom: this.containerRect.bottom
     }
-  
-    this._debugEl.stickyDiv.innerHTML = `
+    
+    if (this._debugEl.stickyDiv) {
+      this._debugEl.stickyDiv.innerHTML = `
           <p>Top: ${position.top}</p>
           <p>Bottom: ${position.bottom}</p>
           <p>Bound Top: ${position.boundTop}</p>
           <p>Bound Bottom: ${position.boundBottom}</p>
           <p>Percent: ${this.scrollPercent}</p>
           `
+    }
+    
   }
   
-  public animate (elementOptions: PageScrollerAnimatorOptions) {
-    console.log('animate', elementOptions.target)
+  /**
+   * Allow to animate another element in the same container as the one used in the observer
+   * @param elementOptions
+   */
+  public animate (elementOptions: WdsaAnimatorOptions) {
     if (!elementOptions.target) {
       console.error('You must provide a target element', elementOptions)
       return this
     }
     
     // first check if the target has already an animator
-    const existing = elementOptions.target[PageScrollerAnimator._libName]
+    const existing = elementOptions.target[WdsaAnimator.libName]
     
     if (existing) {
       // merge the existing options with the new ones
       existing.updateOptions(elementOptions)
     } else {
-      this._animators.push(new PageScrollerAnimator(elementOptions))
+      this._animators.push(new WdsaAnimator(elementOptions))
     }
     
     return this
