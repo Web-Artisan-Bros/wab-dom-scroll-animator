@@ -1371,7 +1371,13 @@ class WdsaAnimator extends WdsaBasic {
   _animationCssVariables;
   constructor(options) {
     super("animator", options);
-    this._options.target[WdsaAnimator.libName] = this;
+    if (this._options.target instanceof NodeList) {
+      this._options.target.forEach((target) => {
+        target[WdsaAnimator.libName] = this;
+      });
+    } else {
+      this._options.target[WdsaAnimator.libName] = this;
+    }
     this._initAnimation(this._options);
   }
   /**
@@ -1393,18 +1399,30 @@ class WdsaAnimator extends WdsaBasic {
       }
     });
     this.destroyAnimations();
-    this._animation = anime({
+    const mainAnimationOptions = {
       targets: options.target,
-      ...options.properties,
-      ...defaultAnimeOptions
-    });
+      ...defaultAnimeOptions,
+      ...options.properties
+    };
+    if (options.delay) {
+      mainAnimationOptions.delay = options.delay;
+    }
+    this._animation = anime(mainAnimationOptions);
     if (Object.keys(cssVariables).length) {
-      this._animationCssVariables = anime({
-        targets: cssVariables,
+      let targets = cssVariables;
+      if (options.target instanceof NodeList) {
+        targets = [...options.target].map((el) => ({ ...cssVariables }));
+      }
+      const cssAnimationOptions = {
+        targets,
         ...cssVariables,
         ...defaultAnimeOptions,
         update: this.onCssVariablesUpdate.bind(this)
-      });
+      };
+      if (options.delay) {
+        cssAnimationOptions.delay = options.delay;
+      }
+      this._animationCssVariables = anime(cssAnimationOptions);
     }
   }
   /**
@@ -1427,7 +1445,7 @@ class WdsaAnimator extends WdsaBasic {
       if (percentage < 0) {
         percentage = 0;
       }
-      this.playPercentage = percentage;
+      this.playPercentage = this._animation.duration ? this._animation.duration * percentage / 100 : percentage;
       this._animation.seek(this.playPercentage);
       if (this._animationCssVariables) {
         this._animationCssVariables.seek(this.playPercentage);
@@ -1440,8 +1458,13 @@ class WdsaAnimator extends WdsaBasic {
    * @private
    */
   onCssVariablesUpdate(anim) {
-    anim.animations.forEach((animation) => {
-      this._options.target.style.setProperty(animation.property, animation.currentValue);
+    anim.animations.forEach((animation, i) => {
+      if (this._options.target instanceof NodeList) {
+        const index = animation.animatable.id;
+        this._options.target[index]?.style.setProperty(animation.property, animation.currentValue);
+      } else {
+        this._options.target.style.setProperty(animation.property, animation.currentValue);
+      }
     });
   }
   /**
@@ -1488,12 +1511,6 @@ class WdsaObserver extends WdsaBasic {
     this._initDebugger();
   }
   /**
-   * Return the offsetHeight of the container
-   */
-  get viewHeight() {
-    return this._options.container.offsetHeight;
-  }
-  /**
    * Return the container element
    */
   get container() {
@@ -1531,11 +1548,14 @@ class WdsaObserver extends WdsaBasic {
    * Return the scroll percentage based on the percentage of the container that is visible
    */
   get scrollPercent() {
-    let scrollY = this.scrollRootY - this.containerOffset.top;
-    if (scrollY < 0) {
+    let scrollY = 0 - this.containerRect.top;
+    const allowNegativeStart = this._options.elements.some((elementOptions) => {
+      return elementOptions.startAt ? elementOptions.startAt < 0 : false;
+    });
+    if (scrollY < 0 && !allowNegativeStart) {
       return 0;
     }
-    const value = scrollY / this.viewHeight * 100;
+    const value = scrollY / this.containerRect.height * 100;
     if (value > 100) {
       return 100;
     }
@@ -1546,7 +1566,7 @@ class WdsaObserver extends WdsaBasic {
    * @private
    */
   _initAnimators() {
-    this._options.elements.forEach((elementOptions) => {
+    this._options.elements?.forEach((elementOptions) => {
       this.animate(elementOptions);
     });
   }
@@ -1627,11 +1647,18 @@ class WdsaObserver extends WdsaBasic {
       console.error("You must provide a target element", elementOptions);
       return this;
     }
-    const existing = elementOptions.target[WdsaAnimator.libName];
+    let existing;
+    if (elementOptions.target instanceof NodeList) {
+      existing = [...elementOptions.target].find((target) => target[WdsaAnimator.libName]);
+    } else {
+      existing = elementOptions.target[WdsaAnimator.libName];
+    }
     if (existing) {
       existing.updateOptions(elementOptions);
+      existing.update(this.scrollPercent);
     } else {
       this._animators.push(new WdsaAnimator(elementOptions));
+      this._animators[this._animators.length - 1].update(this.scrollPercent);
     }
     return this;
   }
@@ -1674,6 +1701,9 @@ class WDSA extends WdsaBasic {
       container[this.libName] = instance;
     }
     return instance;
+  }
+  static stagger(value, options) {
+    return anime.stagger(value, options);
   }
 }
 

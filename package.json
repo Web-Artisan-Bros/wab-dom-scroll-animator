@@ -4,7 +4,8 @@
   "description": "Wab DOM Scroll Animator",
   "scripts": {
     "dev": "vite",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "validate": "tsc --noEmit"
   },
   "files": [
     "dist"
@@ -23,6 +24,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "animejs": "^3.2.1"
   },

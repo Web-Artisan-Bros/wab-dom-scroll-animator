@@ -1,3 +1,5 @@
+import { StaggerOptions } from 'animejs';
+
 type WdsaAnimatorProperty = {
   // css properties
   width: WdsaAnimatorProperty
@@ -23,13 +25,15 @@ type WdsaAnimatorProperty = {
   translateY: WdsaAnimatorProperty
   translateZ: WdsaAnimatorProperty
   rotate: WdsaAnimatorProperty
-  
+
 }
+
+type WdsaAnimatorDelayFn = (element: HTMLElement, index: number, length: number) => number
 
 interface WdsaAnimatorOptions {
   // Target element to animate
   
-  target: HTMLElement & Record<string, any>,
+  target: HTMLElement & Record<string, any> | NodeList,
   
   properties: Record<(keyof Partial<WdsaAnimatorProperty>), [string | number, string | number]> | Record<string, [string | number, string | number]>,
   
@@ -41,6 +45,9 @@ interface WdsaAnimatorOptions {
   
   // percentage on when to end animation
   endAt?: number
+  
+  // delay used for stagger effect
+  delay: WdsaAnimatorDelayFn
 }
 
 interface WdsaObserverOptions {
@@ -88,10 +95,6 @@ declare class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
      */
     private _animators;
     constructor(options: WdsaObserverOptions);
-    /**
-     * Return the offsetHeight of the container
-     */
-    get viewHeight(): number;
     /**
      * Return the container element
      */
@@ -158,6 +161,7 @@ declare class WDSA extends WdsaBasic {
      * @param {WdsaObserverOptions} options
      */
     static register(options: WdsaObserverOptions): WdsaObserver;
+    static stagger(value: number | string | ReadonlyArray<number | string>, options?: StaggerOptions): WdsaAnimatorDelayFn;
 }
 
 export { WDSA as default };

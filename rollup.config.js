@@ -3,6 +3,15 @@ import esbuild from 'rollup-plugin-esbuild'
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default [
+  // Run this first to generate the .d.ts file and validate tsc
+  {
+    input: `src/index.ts`,
+    plugins: [dts()],
+    output: {
+      file: `dist/index.d.ts`,
+      format: 'es'
+    }
+  },
   {
     input: `src/index.ts`,
     plugins: [esbuild(), nodeResolve()],
@@ -34,13 +43,6 @@ export default [
         exports: 'default'
       }
     ]
-  },
-  {
-    input: `src/index.ts`,
-    plugins: [dts()],
-    output: {
-      file: `dist/index.d.ts`,
-      format: 'es'
-    }
   }
+  
 ]
