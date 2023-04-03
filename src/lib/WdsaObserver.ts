@@ -76,17 +76,20 @@ export class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
    */
   get scrollPercent (): number {
     let scrollY = 0 - this.containerRect.top
-    
-    if (scrollY < 0) {
+    const allowNegativeStart = this._options.elements.some((elementOptions) => {
+      return elementOptions.startAt < 0
+    })
+  
+    if (scrollY < 0 && !allowNegativeStart) {
       return 0
     }
-    
+  
     const value = (scrollY / this.containerRect.height) * 100
-    
+  
     if (value > 100) {
       return 100
     }
-    
+  
     return +value.toFixed(2)
   }
   
@@ -185,7 +188,6 @@ export class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
           <p>Percent: ${this.scrollPercent}</p>
           `
     }
-    
   }
   
   /**
@@ -197,17 +199,25 @@ export class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
       console.error('You must provide a target element', elementOptions)
       return this
     }
-    
-    // first check if the target has already an animator
-    const existing = elementOptions.target[WdsaAnimator.libName]
-    
+  
+    let existing
+  
+    if (elementOptions.target instanceof NodeList) {
+      existing = [...elementOptions.target].find(target => target[WdsaAnimator.libName])
+    } else {
+      // first check if the target has already an animator
+      existing = elementOptions.target[WdsaAnimator.libName]
+    }
+  
     if (existing) {
       // merge the existing options with the new ones
       existing.updateOptions(elementOptions)
+      existing.update(this.scrollPercent)
     } else {
       this._animators.push(new WdsaAnimator(elementOptions))
+      this._animators[this._animators.length - 1].update(this.scrollPercent)
     }
-    
+  
     return this
   }
 }

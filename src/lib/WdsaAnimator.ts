@@ -1,4 +1,5 @@
-import anime, { AnimeInstance } from 'animejs'
+import anime from 'animejs'
+import { AnimeInstance } from 'animejs'
 import { WdsaAnimatorOptions } from './Interfaces/WdsaAnimatorOptions'
 import { debounce } from './utilities/debounce'
 import { generateLibName } from './utilities/libNameGenarator'
@@ -32,9 +33,15 @@ export class WdsaAnimator extends WdsaBasic<WdsaAnimatorOptions> {
   
   constructor (options: WdsaAnimatorOptions) {
     super('animator', options)
-    
-    this._options.target[WdsaAnimator.libName] = this
-    
+  
+    if (this._options.target instanceof NodeList) {
+      this._options.target.forEach((target: HTMLElement) => {
+        target[WdsaAnimator.libName] = this
+      })
+    } else {
+      this._options.target[WdsaAnimator.libName] = this
+    }
+  
     this._initAnimation(this._options)
   }
   
@@ -55,32 +62,50 @@ export class WdsaAnimator extends WdsaBasic<WdsaAnimatorOptions> {
       if (key.startsWith('--')) {
         // @ts-ignore
         cssVariables[key] = options.properties[key] as any
-        
+  
         // @ts-ignore
         delete options.properties[key]
       }
     })
-    
+  
     // destroy the previous animations if any
     // this is necessary when we update the options
     this.destroyAnimations()
-    
-    // create and store an instance of anime.js
-    this._animation = anime({
+  
+    const mainAnimationOptions: any = {
       targets: options.target,
-      ...options.properties,
-      ...defaultAnimeOptions
-    })
-    
+      ...defaultAnimeOptions,
+      ...options.properties
+    }
+  
+    if (options.delay) {
+      mainAnimationOptions.delay = options.delay
+    }
+  
+    // create and store an instance of anime.js
+    this._animation = anime(mainAnimationOptions)
+  
     // if there are css variables to animate, create an instance of anime.js for them
     // by animating a simple object
     if (Object.keys(cssVariables).length) {
-      this._animationCssVariables = anime({
-        targets: cssVariables,
+      let targets = cssVariables
+    
+      if (options.target instanceof NodeList) {
+        targets = [...options.target].map(el => ({ ...cssVariables }))
+      }
+    
+      const cssAnimationOptions = {
+        targets,
         ...cssVariables,
         ...defaultAnimeOptions,
         update: this.onCssVariablesUpdate.bind(this)
-      })
+      }
+    
+      if (options.delay) {
+        cssAnimationOptions.delay = options.delay
+      }
+    
+      this._animationCssVariables = anime(cssAnimationOptions)
     }
   }
   
@@ -103,21 +128,21 @@ export class WdsaAnimator extends WdsaBasic<WdsaAnimatorOptions> {
       if (subPercentage) {
         percentage = (percentage * 100) / subPercentage
       }
-      
+  
       // if percentage is > 100, then set it to 100
       if (percentage > 100) {
         percentage = 100
       }
-      
+  
       // if percentage is < 0, then set it to 0
       if (percentage < 0) {
         percentage = 0
       }
-      
-      this.playPercentage = percentage
-      
+  
+      this.playPercentage = this._animation.duration ? ((this._animation.duration * percentage) / 100) : percentage
+  
       this._animation.seek(this.playPercentage)
-      
+  
       if (this._animationCssVariables) {
         this._animationCssVariables.seek(this.playPercentage)
       }
@@ -130,8 +155,14 @@ export class WdsaAnimator extends WdsaBasic<WdsaAnimatorOptions> {
    * @private
    */
   private onCssVariablesUpdate (anim: AnimeInstance) {
-    anim.animations.forEach((animation) => {
-      this._options.target.style.setProperty(animation.property, animation.currentValue)
+    anim.animations.forEach((animation, i) => {
+      if (this._options.target instanceof NodeList) {
+        const index = animation.animatable.id;
+        
+        (this._options.target[index] as HTMLElement)?.style.setProperty(animation.property, animation.currentValue)
+      } else {
+        this._options.target.style.setProperty(animation.property, animation.currentValue)
+      }
     })
   }
   

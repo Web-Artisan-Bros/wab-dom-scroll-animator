@@ -3,7 +3,7 @@ import { WdsaAnimatorProperty } from './WdsaAnimatorProperty'
 export interface WdsaAnimatorOptions {
   // Target element to animate
   
-  target: HTMLElement & Record<string, any>,
+  target: HTMLElement & Record<string, any> | NodeList,
   
   properties: Record<(keyof Partial<WdsaAnimatorProperty>), [string | number, string | number]> | Record<string, [string | number, string | number]>,
   
@@ -15,5 +15,8 @@ export interface WdsaAnimatorOptions {
   
   // percentage on when to end animation
   endAt?: number
+  
+  // delay used for stagger effect
+  delay: (...args) => number
 }
 

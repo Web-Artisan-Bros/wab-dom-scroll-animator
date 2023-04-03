@@ -23,7 +23,7 @@ export type WdsaAnimatorProperty = {
   translateY: WdsaAnimatorProperty
   translateZ: WdsaAnimatorProperty
   rotate: WdsaAnimatorProperty
-  
+
 }
 
 export type WdsaAnimatorPropertyValue = string | number | ((el: HTMLElement, i: number) => void)

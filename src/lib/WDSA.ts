@@ -2,6 +2,8 @@ import { WdsaObserver } from './WdsaObserver'
 import { WdsaObserverOptions } from './Interfaces/WdsaObserverOptions'
 import { generateLibName } from './utilities/libNameGenarator'
 import { WdsaBasic } from './WdsaBasic'
+import anime from 'animejs'
+import { StaggerOptions } from 'animejs'
 
 export class WDSA extends WdsaBasic {
   public static readonly libName = generateLibName('wdsa')
@@ -53,15 +55,19 @@ export class WDSA extends WdsaBasic {
     } else {
       // create a new instance of the observer
       instance = new WdsaObserver(options)
-      
+  
       // add the instance to the list of observers
       this._observers.push(instance)
-      
+  
       // save the instance in the container element
       container[this.libName] = instance
     }
   
     // return the created observer instance
     return instance
+  }
+  
+  public static stagger (value: number | string | ReadonlyArray<number | string>, options?: StaggerOptions): (...args) => number {
+    return anime.stagger(value, options)
   }
 }
