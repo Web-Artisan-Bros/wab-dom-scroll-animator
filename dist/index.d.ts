@@ -8,6 +8,7 @@ type WdsaAnimatorProperty = {
   right: WdsaAnimatorProperty
   bottom: WdsaAnimatorProperty
   left: WdsaAnimatorProperty
+  opacity: WdsaAnimatorProperty
   
   // transform properties
   rotateX: WdsaAnimatorProperty
