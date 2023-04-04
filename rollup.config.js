@@ -1,6 +1,7 @@
 import dts from 'rollup-plugin-dts'
 import esbuild from 'rollup-plugin-esbuild'
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { terser } from 'rollup-plugin-terser'
 
 export default [
   // Run this first to generate the .d.ts file and validate tsc
@@ -14,7 +15,7 @@ export default [
   },
   {
     input: `src/index.ts`,
-    plugins: [esbuild(), nodeResolve()],
+    plugins: [esbuild(), nodeResolve(), terser()],
     output: [
       {
         file: `dist/index.cjs.js`,

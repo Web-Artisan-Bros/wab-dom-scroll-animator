@@ -1,7 +1,7 @@
 {
-  "name": "wab_dom_scroll_animator",
+  "name": "wab-dom-scroll-animator",
   "version": "1.0.0",
-  "description": "Wab DOM Scroll Animator",
+  "description": "Wab DOM Scroll Animator library allows to react to scroll events and animate DOM elements based on the scroll position.",
   "scripts": {
     "dev": "vite",
     "build": "rollup -c",
@@ -17,16 +17,27 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.umd.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.js",
+      "node": "./dist/index.cjs.js"
     }
   },
   "types": "./dist/index.d.ts",
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "wab",
+    "dom",
+    "scroll",
+    "animator",
+    "animation",
+    "dom"
+  ],
+  "author": "Leica Florian Robert <florian.leica@webartisanbros.com> (https://webartisanbros.com)",
+  "homepage": "https://github.com/Web-Artisan-Bros/wab-dom-scroll-animator",
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "animejs": "^3.2.1"
+    "animejs": "^3.2.1",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.1",
