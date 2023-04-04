@@ -76,7 +76,7 @@ export class WdsaObserver extends WdsaBasic<WdsaObserverOptions> {
    */
   get scrollPercent (): number {
     let scrollY = 0 - this.containerRect.top
-    const allowNegativeStart = this._options.elements.some((elementOptions) => {
+    const allowNegativeStart = this._options.elements?.some((elementOptions) => {
       return elementOptions.startAt ? elementOptions.startAt < 0 : false
     })
   
