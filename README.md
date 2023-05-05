@@ -53,8 +53,8 @@ WDSA.register({
     - `elements` - Array of objects
       - `target` - DOM element to animate | NodeList of DOM elements to animate
       - `properties` - Object with the properties to animate. See all available properties below
-      - `startAt` - Number (optional) - Start animation at this percentage of the container height
-      - `endAt` - Number (optional) - End animation at this percentage of the container height
+      - `startAt` - Number (optional) - Start animation at this percentage of the container height, from the TOP
+      - `endAt` - Number (optional) - End animation at this percentage of the container height, from the BOTTOM
       - `debounceTime` - Number (optional) - Debounce time in milliseconds
       - `delay` - fn() => Number (optional) - Delay in milliseconds - Used for staggering elements
   - **returns** `WDSA` instance 

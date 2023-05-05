@@ -48,6 +48,11 @@ export class WDSA extends WdsaBasic {
     // check if the container already has an observer instance
     // if so, I will use that instance to add the new elements to animate
     if (container[this.libName]) {
+      // Sometimes, if the container gets removed from the DOM and then added again,
+      // the container will still have the observer instance saved in it.
+      // So I need to check if the instance is still in the list of observers.
+      // If not, I will create a new instance.
+      
       instance = this._observers.find((instance) => instance.id === container[this.libName].id) as WdsaObserver
       
       options.elements.forEach((element) => {
