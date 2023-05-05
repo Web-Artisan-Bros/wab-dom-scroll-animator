@@ -1,5 +1,5 @@
 {
-  "name": "wab-dom-scroll-animator",
+  "name": "@webartisanbros/dom-scroll-animator",
   "version": "1.0.1",
   "description": "Wab DOM Scroll Animator library allows to react to scroll events and animate DOM elements based on the scroll position.",
   "scripts": {
